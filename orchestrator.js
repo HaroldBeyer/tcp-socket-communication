@@ -23,62 +23,8 @@ readFile("../atividade3/lista_dispositivos.txt", (err, data) => {
 
     client.connect(originDevice.port, originDevice.ip, () => {
         console.log("Connected to orchestrator. Sending command");
-        client.write(JSON.stringify(destinationDevice));
+        console.log(destinationDevice.name);
+        const msg = `${destinationDevice.name} ${destinationDevice.ip} ${destinationDevice.port}`;
+        client.write(msg);
     });
 });
-
-
-//     connectDevices(devicesLength, devices).then((res) => {
-//         console.log("Res", res);
-//     }).catch((error) => {
-//         console.log(error);
-//     })
-
-// });
-// async function connectDevices(devicesLength, devices) {
-//     const promises = [];
-//     for (let index = 0; index < devicesLength; index++) {
-//         const promise = new Promise((resolve, reject) => {
-//             const currentDevice = devices[index];
-//             let nextDevice;
-//             if (devices[index + 1]) {
-//                 nextDevice = devices[index + 1];
-//             } else if (index != 0) {
-//                 nextDevice = devices[0];
-//             } else if (devices[index - 1]) {
-//                 nextDevice = devices[index - 1];
-//             } else {
-//                 console.log("ERROR");
-//                 throw (new Error("Unavailable device"));
-//             }
-
-//             nextDevice.port = nextDevice.port.replace('\r', '');
-//             nextDevice.port = nextDevice.port.replace('r', '');
-
-//             let msg = `${currentDevice.name} CONECTAR ${nextDevice.name}`;
-
-
-//             try {
-//                 client.connect(nextDevice.port, nextDevice.ip, () => {
-//                     console.log("Conectou!", nextDevice.name);
-//                     client.write('serverrecept', { msg });
-//                 });
-
-//                 client.on('clientrecept', (mensagem) => {
-//                     console.log("Mensagem: ", mensagem);
-//                 });
-//             } catch (error) {
-//                 reject(error);
-//             } finally {
-//                 resolve('Success');
-//             }
-
-//         });
-
-//         promises.push(promise);
-
-
-//         const result = await Promise.all(promises);
-//         return result;
-//     }
-// }

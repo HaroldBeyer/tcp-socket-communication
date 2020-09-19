@@ -1,2 +1,2 @@
-Temperatura_1 127.0.0.1 3080
-Temperatura_2 127.0.0.1 3081
+JEAN 2.tcp.ngrok.io 12776
+HAROLDO 0.tcp.ngrok.io 11119
