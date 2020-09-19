@@ -1,17 +1,13 @@
-const port = 3080;
-const name = "Torradeira";
-// const port = 3081;
-// const name = "Assadeira";
+// const devicePort = 3080;
+// const deviceName = "Torradeira";
+const devicePort = 3081;
+const deviceName = "Assadeira";
 
 const net = require('net');
-const client = net.Socket();
-
-
-let returnMsg;
-
-
+const deviceIp = "127.0.0.1";
 
 net.createServer((socket) => {
+
     console.log('Socket Conectado');
     socket.pipe(socket);
 
@@ -20,14 +16,32 @@ net.createServer((socket) => {
     });
 
     socket.on('data', (data) => {
-        console.log("Data: ", data.toString());
-        const newData = JSON.parse(data.toString());
+        const newData = data.toString();
+        console.log("Data: ", newData);
+        //se conectar com device
+        const client = new net.Socket();
+        if (newData.includes('name') && newData.includes('ip') && newData.includes('port') && !newData.includes('msg')) {
+            console.log('got into first');
+            const { name, ip, port } = JSON.parse(newData);
+            const msg = { msg: `${deviceName} CONECTAR ${name}`, device: { ip: deviceIp, name: deviceName, port: devicePort } };
+            client.connect(port, ip, () => client.write(JSON.stringify(msg)));
+            console.log("Done");
+            // client.on('data', (_data) => console.log('Data: ', _data.toString()));
+        } else if (newData.includes('msg')) {
+            console.log('got into second');
+            const { msg, device } = JSON.parse(newData);
+            console.log("Got msg: ", msg);
+            client.connect(device.port, device.ip, () => {
+                let cont = 0;
+                const estado = Math.random() >= 0.5;
+                setTimeout(() => {
+                    client.write(`${deviceName} ${estado ? 'ATIVADO' : 'DESATIVADO'} ${cont * 30}`);
+                    cont++;
+                }, 30000);
+            });
+        } else if (newData.includes('barril')) {
 
-        client.connect(newData.port, newData.id, () => {
-            console.log("Conetado")
-            client.write('greet', { msg: name + "CONECTAR" + newData.name });
-        });
-
+        }
     });
 
     socket.on('end', () => {
@@ -39,55 +53,6 @@ net.createServer((socket) => {
     socket.on('error', (e) => {
         console.log('error ', e);
     });
-
-    socket.on('orchestratorRequest', (data) => {
-        console.log("Reived qrequest");
-        client.connect(data.port, data.id, () => {
-            const res = { msg: name + "CONECTAR" + data.name, info };
-            client.emit('greet', name + "CONECTAR" + data.name);
-        });
-    });
-
-    socket.on('greet', (data) => {
-        const estado = Math.random() >= 0.5;
-        let time = 0;
-        client.emit('status', `${name} ${estado ? 'ativado' : 'desativado'} ${time}`)
-        if (estado) {
-            setTimeout(() => {
-                const temperature = Math.random() * 10;
-                client.emit('temperature', temperature);
-            }, 30000)
-        }
-    });
-
-    socket.on('status', (status) => {
-        console.log(`Received status: ${status}`);
-    });
-
-    socket.on('temperature', (temperature) => {
-        console.log(`Received temperature: ${temperature}`);
-    });
-
-
-
-    socket.on('serverrecept', (msg) => {
-        console.log("msg: ", msg);
-
-        const name = msg.returnMsg.parse(' ');
-        const estado = Math.random() >= 0.5;
-        let tries = 0;
-        if (estado) {
-            setTimeout(() => {
-                returnMsg = `${name} ATIVADO ${tries * 30}`;
-                tries++;
-            }, 30000);
-        } else {
-            returnMsg = "DESATIVADO";
-        }
-    });
-    if (returnMsg) {
-        socket.emit('clientrecept', { returnMsg });
-    }
-}).listen(port, () => {
-    console.log('TCP SERVER na porta', port);
+}).listen(devicePort, () => {
+    console.log('TCP SERVER na porta', devicePort);
 });

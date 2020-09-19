@@ -1,6 +1,5 @@
 const net = require('net');
 const { readFile } = require('fs');
-const { resolve } = require('path');
 const client = net.Socket();
 
 const query = "1 CONNECT 2";
@@ -22,7 +21,7 @@ readFile("../atividade3/lista_dispositivos.txt", (err, data) => {
     let originDevice = devices[origin - 1];
     let destinationDevice = devices[destination - 1];
 
-    client.connect(originDevice.port, originDevice.id, () => {
+    client.connect(originDevice.port, originDevice.ip, () => {
         console.log("Connected to orchestrator. Sending command");
         client.write(JSON.stringify(destinationDevice));
     });
